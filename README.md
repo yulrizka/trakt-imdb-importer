@@ -6,6 +6,10 @@ This script will import ratings from IMDB csv output and import it to Trakt.tv u
 
 Warning: The author doesn't guarantee anything including the outcome of the running the script. use at your own risk!.
 
+## Known issue
+* Never check ratings for individual episode of TV Shows
+* If you rate a TV show on IMDB. it will mark all season as watched.
+
 ## Getting IMDB csv file.
 
 1. Login to IMDB
