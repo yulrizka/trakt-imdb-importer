@@ -67,16 +67,16 @@ csv.each_slice(20) do |batch|
 
   batch.each do |row|
     entry = {
-      "rated_at" => Time.parse(row["created"]).strftime("%FT%T"),
-      "rating"   => row["You rated"],
+      "rated_at" => Time.parse(row["Date Added"]).strftime("%FT%T"),
+      "rating"   => row["Your Rating"],
       "title"    => row["Title"],
       "year"     => row["Year"],
       "ids"      => {
-        "imdb"   => row["const"]
+        "imdb"   => row["Const"]
       }
     }
 
-    (row["Title type"] == "TV Series" ?  shows : movies).push entry
+    ((row["Title Type"] == "tvSeries" || row["Title Type"] == "tvMiniSeries") ?  shows : movies).push entry
   end
   
   request = {
@@ -93,7 +93,7 @@ csv.each_slice(20) do |batch|
   if response_ratings && response_ratings.status == 201 && response_history && response_history.status == 201
     # success
     batch.each do |entry|
-      puts "#{entry['const']} - #{entry['Year']} #{entry['Title']} -> #{entry['You rated']}"
+      puts "#{entry['Const']} - #{entry['Year']} #{entry['Title']} -> #{entry['Your Rating']}"
     end
   else
     puts "There is some error while sync data"
