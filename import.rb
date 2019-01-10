@@ -67,7 +67,7 @@ csv.each_slice(20) do |batch|
 
   batch.each do |row|
     entry = {
-      "rated_at" => Time.parse(row["Date Added"]).strftime("%FT%T"),
+      "rated_at" => Time.parse(row["Date Rated"]).strftime("%FT%T"),
       "rating"   => row["Your Rating"],
       "title"    => row["Title"],
       "year"     => row["Year"],
