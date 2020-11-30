@@ -12,8 +12,8 @@ The script is realtively simple < 106 lines of code. You can modify it according
 Warning: The author doesn't guarantee anything including the outcome of the running the script. use at your own risk!.
 
 ## Known issue
-* I Never check/tested ratings for individual episode of TV Shows.
-* If you rate a TV show on IMDB. it will mark all season as watched.
+* ~~I Never check/tested ratings for individual episode of TV Shows.~~ This was tested by [@awendland](https://github.com/awendland/trakt-imdb-importer) after commit *455e5cc2*.
+* ~~If you rate a TV show on IMDB. it will mark all season as watched.~~ This was removed in commit *455e5cc2*. The TV show will still be rated, but it won't have a watch history entry. However, if individual episodes are rated they will have a watch history entry.
 
 ## Getting IMDB csv file.
 
