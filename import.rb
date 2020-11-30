@@ -53,7 +53,9 @@ headers = {
 ##
 # Read from IMDB csv output and send in batch of 20 entries
 ##
-csv = CSV.read(ARGV[0], headers: true)
+csv = CSV.parse(File.read(ARGV[0]).scrub, headers: true)
+
+headers = headers ? headers : {}
 
 nbatch = 20
 total_record = csv.count
