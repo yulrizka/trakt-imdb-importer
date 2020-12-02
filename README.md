@@ -11,10 +11,6 @@ The script is realtively simple < 106 lines of code. You can modify it according
 
 Warning: The author doesn't guarantee anything including the outcome of the running the script. use at your own risk!.
 
-## Known issue
-* I Never check/tested ratings for individual episode of TV Shows.
-* If you rate a TV show on IMDB. it will mark all season as watched.
-
 ## Getting IMDB csv file.
 
 1. Login to IMDB

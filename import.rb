@@ -1,5 +1,7 @@
 require 'oauth2'
 require 'csv'
+require 'json'
+require 'facets/hash/except'
 
 ##
 # Configuration
@@ -53,7 +55,9 @@ headers = {
 ##
 # Read from IMDB csv output and send in batch of 20 entries
 ##
-csv = CSV.read(ARGV[0], headers: true)
+csv = CSV.parse(File.read(ARGV[0]).scrub, headers: true)
+
+headers = headers ? headers : {}
 
 nbatch = 20
 total_record = csv.count
@@ -64,10 +68,12 @@ csv.each_slice(20) do |batch|
 
   movies = []
   shows = []
+  episodes = []
 
   batch.each do |row|
     entry = {
       "rated_at" => Time.parse(row["Date Added"]).strftime("%FT%T"),
+      "watched_at" => Time.parse(row["Date Added"]).strftime("%FT%T"),
       "rating"   => row["Your Rating"],
       "title"    => row["Title"],
       "year"     => row["Year"],
@@ -76,19 +82,42 @@ csv.each_slice(20) do |batch|
       }
     }
 
-    ((row["Title Type"] == "tvSeries" || row["Title Type"] == "tvMiniSeries") ?  shows : movies).push entry
+    case row["Title Type"]
+    when "tvSeries", "tvMiniSeries"
+      shows.push entry
+    when "movie", "tvMovie"
+      movies.push entry
+    when "tvEpisode"
+      episodes.push entry
+    else
+      puts "Unhandled #{row["Title Type"]}"
+    end
   end
-  
-  request = {
-    body: {movies: movies, shows:shows}.to_json,
+
+  ratings_request = {
+    body: {
+      movies: movies.map{|e| e.except("watched_at")},
+      shows: shows.map{|e| e.except("watched_at")},
+      episodes: episodes.map{|e| e.except("watched_at")},
+    }.to_json,
+    headers: headers
+  }
+  history_request = {
+    body: {
+      movies: movies.map{|e| e.except("rated_at", "rating")},
+      # Do NOT include shows in history request because it will mark all episodes as watched on a single
+      # date, which is likely not a desired outcome.
+      # shows: shows.map{|e| e.except("rated_at", "rating")},
+      episodes: episodes.map{|e| e.except("rated_at", "rating")},
+    }.to_json,
     headers: headers
   }
 
   # synchronize ratings
-  response_ratings = token.post('sync/ratings', request)
+  response_ratings = token.post('sync/ratings', ratings_request)
 
   # synchronize watched
-  response_history = token.post('sync/history', request)
+  response_history = token.post('sync/history', history_request)
 
   if response_ratings && response_ratings.status == 201 && response_history && response_history.status == 201
     # success
@@ -96,7 +125,7 @@ csv.each_slice(20) do |batch|
       puts "#{entry['Const']} - #{entry['Year']} #{entry['Title']} -> #{entry['Your Rating']}"
     end
   else
-    puts "There is some error while sync data"
+    puts "There was an error while syncing data"
     puts "sync ratings resposne: #{response_ratings.status}, sync history response: #{response_history.status}"
   end
 
